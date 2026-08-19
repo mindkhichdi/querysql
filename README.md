@@ -1,7 +1,6 @@
 # QueryDeck
 
-A desktop SQL client for browsing and editing SQLite and Postgres databases — a functional clone
-of [sql.studio](https://sql.studio)'s core workflow, built independently with Tauri, Rust, and
+A desktop SQL client for browsing and editing SQLite and Postgres databases — built independently with Tauri, Rust, and
 React.
 
 ## Features
