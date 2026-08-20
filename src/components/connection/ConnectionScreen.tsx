@@ -1,5 +1,5 @@
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { Database, FolderOpen, Plus, Server } from "lucide-react";
+import { Database, FolderOpen, Plus, Server, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../common/Button";
 import { PostgresConnectForm } from "./PostgresConnectForm";
@@ -7,7 +7,7 @@ import { useConnectionStore, type RecentConnection } from "../../store/connectio
 import { useThemeStore } from "../../store/themeStore";
 
 export function ConnectionScreen() {
-  const { recents, initRecents, openDatabase } = useConnectionStore();
+  const { recents, initRecents, openDatabase, removeRecent } = useConnectionStore();
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggle);
   const [error, setError] = useState<string | null>(null);
@@ -100,24 +100,36 @@ export function ConnectionScreen() {
             </div>
             <div className="rounded-lg border border-[var(--qd-border)] divide-y divide-[var(--qd-border)] overflow-hidden">
               {recents.map((r) => (
-                <button
+                <div
                   key={`${r.kind}-${r.path}`}
-                  onClick={() => (r.kind === "postgres" ? openPgForm(r.pg) : connect(r.path))}
-                  disabled={busy}
-                  className="w-full text-left px-3 py-2 flex items-center gap-2.5 hover:bg-[var(--qd-bg-elevated)] cursor-pointer disabled:opacity-40"
+                  className="group w-full flex items-center gap-2.5 pl-3 pr-1.5 py-2 hover:bg-[var(--qd-bg-elevated)]"
                 >
-                  {r.kind === "postgres" ? (
-                    <Server size={13} className="text-[var(--qd-accent)] shrink-0" />
-                  ) : (
-                    <Database size={13} className="text-[var(--qd-text-muted)] shrink-0" />
-                  )}
-                  <div className="min-w-0">
-                    <div className="text-[12.5px] truncate">{r.name}</div>
-                    <div className="text-[11px] text-[var(--qd-text-muted)] truncate qd-mono">
-                      {r.path}
+                  <button
+                    onClick={() => (r.kind === "postgres" ? openPgForm(r.pg) : connect(r.path))}
+                    disabled={busy}
+                    className="flex-1 min-w-0 text-left flex items-center gap-2.5 cursor-pointer disabled:opacity-40"
+                  >
+                    {r.kind === "postgres" ? (
+                      <Server size={13} className="text-[var(--qd-accent)] shrink-0" />
+                    ) : (
+                      <Database size={13} className="text-[var(--qd-text-muted)] shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-[12.5px] truncate">{r.name}</div>
+                      <div className="text-[11px] text-[var(--qd-text-muted)] truncate qd-mono">
+                        {r.path}
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                  <button
+                    onClick={() => removeRecent(r)}
+                    disabled={busy}
+                    title="Remove from recent"
+                    className="shrink-0 rounded-sm p-1 opacity-0 group-hover:opacity-100 text-[var(--qd-text-muted)] hover:text-[var(--qd-danger)] cursor-pointer disabled:opacity-0"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

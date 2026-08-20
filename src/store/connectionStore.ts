@@ -25,12 +25,17 @@ interface ConnectionState {
   openDatabase: (path: string) => Promise<OpenDatabaseResult>;
   connectPostgres: (config: PostgresConnectionConfig) => Promise<OpenDatabaseResult>;
   closeConnection: (id: string) => Promise<void>;
+  removeRecent: (recent: RecentConnection) => Promise<void>;
   setActive: (id: string) => void;
   refreshSchema: (id: string) => Promise<void>;
 }
 
 function pgRecentKey(pg: PgRecentConfig) {
   return `${pg.user}@${pg.host}:${pg.port}/${pg.database}`;
+}
+
+export function recentKey(r: RecentConnection): string {
+  return r.kind === "postgres" && r.pg ? pgRecentKey(r.pg) : r.path;
 }
 
 export const useConnectionStore = create<ConnectionState>((set, get) => ({
@@ -87,6 +92,16 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     });
   },
 
+  removeRecent: async (recent) => {
+    const { recentsStore, recents } = get();
+    const nextRecents = recents.filter((r) => recentKey(r) !== recentKey(recent));
+    set({ recents: nextRecents });
+    if (recentsStore) {
+      await recentsStore.set("recents", nextRecents);
+      await recentsStore.save();
+    }
+  },
+
   setActive: (id) => set({ activeId: id }),
 
   refreshSchema: async (id) => {
@@ -101,8 +116,7 @@ async function recordRecent(
   entry: RecentConnection,
 ) {
   const { recentsStore, recents } = get();
-  const dedupeKey = (r: RecentConnection) => (r.kind === "postgres" && r.pg ? pgRecentKey(r.pg) : r.path);
-  const nextRecents = [entry, ...recents.filter((r) => dedupeKey(r) !== dedupeKey(entry))].slice(0, 12);
+  const nextRecents = [entry, ...recents.filter((r) => recentKey(r) !== recentKey(entry))].slice(0, 12);
   set({ recents: nextRecents });
   if (recentsStore) {
     await recentsStore.set("recents", nextRecents);

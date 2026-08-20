@@ -1,4 +1,4 @@
-import { ChevronDown, Database, FilePlus2, FolderOpen, Plus, Server } from "lucide-react";
+import { ChevronDown, Database, FilePlus2, FolderOpen, Plus, Server, X } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 import { SchemaTree } from "../schema/SchemaTree";
@@ -8,11 +8,17 @@ import { useConnectionStore } from "../../store/connectionStore";
 import { useTabStore } from "../../store/tabStore";
 
 export function Sidebar() {
-  const { connections, activeId, schemas, setActive, openDatabase } = useConnectionStore();
+  const { connections, activeId, schemas, setActive, openDatabase, closeConnection } = useConnectionStore();
   const openQueryTab = useTabStore((s) => s.openQueryTab);
   const openTableTab = useTabStore((s) => s.openTableTab);
+  const closeTabsForConnection = useTabStore((s) => s.closeTabsForConnection);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [showPgForm, setShowPgForm] = useState(false);
+
+  async function handleDisconnect(id: string) {
+    await closeConnection(id);
+    closeTabsForConnection(id);
+  }
 
   const active = connections.find((c) => c.id === activeId) ?? null;
   const schema = activeId ? schemas[activeId] : undefined;
@@ -58,19 +64,34 @@ export function Sidebar() {
         {switcherOpen && (
           <div className="absolute z-20 left-2 right-2 top-[calc(100%-4px)] rounded-md border border-[var(--qd-border)] bg-[var(--qd-bg-elevated)] shadow-lg overflow-hidden">
             {connections.map((c) => (
-              <button
+              <div
                 key={c.id}
-                onClick={() => {
-                  setActive(c.id);
-                  setSwitcherOpen(false);
-                }}
-                className={`w-full text-left px-2.5 py-1.5 text-[12px] hover:bg-[var(--qd-bg-inset)] cursor-pointer truncate flex items-center gap-1.5 ${
+                className={`group w-full flex items-center gap-1.5 pl-2.5 pr-1 py-1.5 hover:bg-[var(--qd-bg-inset)] ${
                   c.id === activeId ? "text-[var(--qd-accent)]" : ""
                 }`}
               >
-                {c.kind === "postgres" ? <Server size={11} className="shrink-0" /> : <Database size={11} className="shrink-0" />}
-                <span className="truncate">{c.name}</span>
-              </button>
+                <button
+                  onClick={() => {
+                    setActive(c.id);
+                    setSwitcherOpen(false);
+                  }}
+                  className="flex-1 min-w-0 text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  {c.kind === "postgres" ? (
+                    <Server size={11} className="shrink-0" />
+                  ) : (
+                    <Database size={11} className="shrink-0" />
+                  )}
+                  <span className="truncate text-[12px]">{c.name}</span>
+                </button>
+                <button
+                  onClick={() => handleDisconnect(c.id)}
+                  title="Disconnect"
+                  className="shrink-0 rounded-sm p-0.5 opacity-0 group-hover:opacity-100 text-[var(--qd-text-muted)] hover:text-[var(--qd-danger)] cursor-pointer"
+                >
+                  <X size={12} />
+                </button>
+              </div>
             ))}
             <div className="border-t border-[var(--qd-border)]">
               <button
