@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ — QuerySQL</title>
+<meta name="description" content="Answers to common questions about QuerySQL: pricing, data privacy, supported platforms, the macOS security warning, Postgres and SQLite support, and whether it's open source.">
+<link rel="canonical" href="https://querysql.dev/faq.html">
+<link rel="icon" type="image/png" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QuerySQL">
+<meta property="og:title" content="FAQ — QuerySQL">
+<meta property="og:description" content="Answers to common questions about QuerySQL: pricing, data privacy, supported platforms, and the macOS security warning.">
+<meta property="og:url" content="https://querysql.dev/faq.html">
+<meta property="og:image" content="https://querysql.dev/icon.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FAQ — QuerySQL">
+<meta name="twitter:description" content="Answers to common questions about QuerySQL: pricing, data privacy, supported platforms, and the macOS security warning.">
+<meta name="twitter:image" content="https://querysql.dev/icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is QuerySQL free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. QuerySQL is free to download and use, and the source is publicly available on GitHub." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does QuerySQL send my data anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. QuerySQL is a native desktop app — it talks directly to your local SQLite file or your own Postgres server. Nothing is proxied through a third-party service, and no query or table data ever leaves your machine." }
+    },
+    {
+      "@type": "Question",
+      "name": "What platforms does QuerySQL support?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The current download is a native build for Apple Silicon Macs (arm64), distributed as a .dmg. QuerySQL is built with Tauri, so Windows and Linux builds are possible from source; prebuilt installers for those platforms aren't published yet." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does macOS say QuerySQL can't be verified?",
+      "acceptedAnswer": { "@type": "Answer", "text": "QuerySQL isn't signed with a paid Apple Developer ID or notarized, so Gatekeeper shows a warning on first launch. Open System Settings, go to Privacy & Security, scroll to the bottom, and click Open Anyway next to QuerySQL. You only need to do this once." }
+    },
+    {
+      "@type": "Question",
+      "name": "What databases does QuerySQL support?",
+      "acceptedAnswer": { "@type": "Answer", "text": "SQLite and Postgres. Open or create a local SQLite file, or connect to a Postgres server with host, port, user, password, database, and SSL mode. The Rust backend is written behind a dialect abstraction, so more databases could be added later." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the table editor keep me from breaking my data?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Edits in the table view — adding, editing, duplicating, or deleting rows — are staged locally first. Nothing touches the database until you click Commit, which applies every staged change as one transaction. Click Discard instead and it's as if nothing happened." }
+    },
+    {
+      "@type": "Question",
+      "name": "Are my Postgres passwords stored on disk?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Postgres passwords are never persisted. Recent Postgres connections are saved without a password, so reconnecting from that list always re-prompts you for it. Everything else — recent connections, query history, theme — is saved locally on your machine." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens with Postgres tables that don't have a primary key?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Postgres has no stable per-row identifier equivalent to SQLite's rowid, so for tables without a primary key, QuerySQL falls back to using every column together as a composite identity when editing rows." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is QuerySQL open source?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The source is publicly available on GitHub. It's built and maintained independently — if you find it useful, you can support development at buymeacoffee.com/mindkhichdi." }
+    },
+    {
+      "@type": "Question",
+      "name": "How is QuerySQL different from TablePlus, DBeaver, Postico, or pgAdmin?",
+      "acceptedAnswer": { "@type": "Answer", "text": "QuerySQL is free, native (built with Tauri and Rust rather than Electron or Java), supports both SQLite and Postgres in one app, and its table editor stages every edit for a transactional commit or discard. See the comparison page for a full breakdown." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will there be a Windows or Linux build?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Not officially distributed yet. Because QuerySQL is built with Tauri, which supports Windows and Linux, a build from source is possible today; prebuilt installers for those platforms depend on interest and are on the roadmap." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="wordmark" href="/"><span class="dot"></span>QuerySQL</a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/compare.html">Compare</a>
+      <a href="/faq.html" aria-current="page">FAQ</a>
+      <a href="/about.html">About</a>
+      <a class="sponsor" href="https://buymeacoffee.com/mindkhichdi">☕ Sponsor me</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">frequently asked questions</p>
+    <h1>Everything people ask before downloading</h1>
+    <p class="dek">Pricing, data privacy, platform support, and the security warning macOS shows on first launch.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="faq-list">
+
+      <details class="faq-item" open>
+        <summary>Is QuerySQL free?</summary>
+        <div class="faq-answer">
+          <p>Yes. QuerySQL is free to download and use, and the source is publicly available on
+          <a href="https://github.com/mindkhichdi/querysql">GitHub</a>.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Does QuerySQL send my data anywhere?</summary>
+        <div class="faq-answer">
+          <p>No. QuerySQL is a native desktop app — it talks directly to your local SQLite file or
+          your own Postgres server. Nothing is proxied through a third-party service, and no query
+          or table data ever leaves your machine.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What platforms does QuerySQL support?</summary>
+        <div class="faq-answer">
+          <p>The current download is a native build for Apple Silicon Macs (<code>arm64</code>),
+          distributed as a <code>.dmg</code>. QuerySQL is built with Tauri, so Windows and Linux
+          builds are possible from source — prebuilt installers for those platforms aren't
+          published yet.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Why does macOS say QuerySQL "can't be verified"?</summary>
+        <div class="faq-answer">
+          <p>QuerySQL isn't signed with a paid Apple Developer ID or notarized, so Gatekeeper warns
+          on first launch. Open <strong>System Settings → Privacy &amp; Security</strong>, scroll
+          to the bottom, and click <strong>Open Anyway</strong> next to QuerySQL. You only need to
+          do this once.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What databases does QuerySQL support?</summary>
+        <div class="faq-answer">
+          <p>SQLite and Postgres. Open or create a local SQLite file, or connect to a Postgres
+          server with host, port, user, password, database, and SSL mode. The Rust backend is
+          written behind a dialect abstraction, so more databases could be added later — see the
+          <a href="/about.html">About page</a> for how that's structured.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How does the table editor keep me from breaking my data?</summary>
+        <div class="faq-answer">
+          <p>Edits in the table view — adding, editing, duplicating, or deleting rows — are staged
+          locally first. Nothing touches the database until you click <strong>Commit</strong>,
+          which applies every staged change as one transaction. Click <strong>Discard</strong>
+          instead and it's as if nothing happened.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Are my Postgres passwords stored on disk?</summary>
+        <div class="faq-answer">
+          <p>No. Postgres passwords are never persisted. Recent Postgres connections are saved
+          without a password, so reconnecting from that list always re-prompts you for it.
+          Everything else — recent connections, query history, theme — is saved locally on your
+          machine.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What happens with Postgres tables that don't have a primary key?</summary>
+        <div class="faq-answer">
+          <p>Postgres has no stable per-row identifier equivalent to SQLite's <code>rowid</code>,
+          so for tables without a primary key, QuerySQL falls back to using every column together
+          as a composite identity when editing rows.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is QuerySQL open source?</summary>
+        <div class="faq-answer">
+          <p>The source is publicly available on
+          <a href="https://github.com/mindkhichdi/querysql">GitHub</a>. It's built and maintained
+          independently — if you find it useful, you can support development at
+          <a href="https://buymeacoffee.com/mindkhichdi">buymeacoffee.com/mindkhichdi</a>.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How is QuerySQL different from TablePlus, DBeaver, Postico, or pgAdmin?</summary>
+        <div class="faq-answer">
+          <p>QuerySQL is free, native (built with Tauri and Rust rather than Electron or Java),
+          supports both SQLite and Postgres in one app, and its table editor stages every edit for
+          a transactional commit or discard. See the <a href="/compare.html">comparison page</a>
+          for a full breakdown.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Will there be a Windows or Linux build?</summary>
+        <div class="faq-answer">
+          <p>Not officially distributed yet. Because QuerySQL is built with Tauri, which supports
+          Windows and Linux, a build from source is possible today; prebuilt installers for those
+          platforms depend on interest and are on the roadmap.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="fine">QuerySQL — built with Tauri, Rust &amp; React.</span>
+    <span class="fine"><a href="/compare.html">Compare</a> · <a href="/about.html">About</a></span>
+    <a class="fine dl" href="/downloads/QuerySQL_0.1.0_aarch64.dmg" download>Download v0.1.0 for macOS →</a>
+  </div>
+</footer>
+
+</body>
+</html>

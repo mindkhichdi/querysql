@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About QuerySQL — How It Works</title>
+<meta name="description" content="How QuerySQL is built: the Tauri/Rust backend, its SQLite and Postgres dialect abstraction, staged/transactional row edits, and how it guards against SQL injection on identifiers.">
+<link rel="canonical" href="https://querysql.dev/about.html">
+<link rel="icon" type="image/png" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QuerySQL">
+<meta property="og:title" content="About QuerySQL — How It Works">
+<meta property="og:description" content="The Tauri/Rust backend, dialect abstraction, and staged/transactional edit model behind QuerySQL.">
+<meta property="og:url" content="https://querysql.dev/about.html">
+<meta property="og:image" content="https://querysql.dev/icon.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="About QuerySQL — How It Works">
+<meta name="twitter:description" content="The Tauri/Rust backend, dialect abstraction, and staged/transactional edit model behind QuerySQL.">
+<meta name="twitter:image" content="https://querysql.dev/icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="wordmark" href="/"><span class="dot"></span>QuerySQL</a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/compare.html">Compare</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html" aria-current="page">About</a>
+      <a class="sponsor" href="https://buymeacoffee.com/mindkhichdi">☕ Sponsor me</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">under the hood</p>
+    <h1>How QuerySQL works</h1>
+    <p class="dek">A native Rust backend, one dialect abstraction for SQLite and Postgres, and an edit model built around staging changes before anything is written.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap prose">
+    <h2>Architecture</h2>
+    <p>QuerySQL is a <a href="https://tauri.app">Tauri</a> app: a Rust backend paired with a React
+    and TypeScript frontend, rendered in the operating system's own webview rather than a bundled
+    Chromium runtime. The two sides communicate over Tauri's command layer.</p>
+    <p>Database access lives behind a <code>DbConnection</code> enum in
+    <code>src-tauri/src/db/</code>. SQLite is implemented with <code>rusqlite</code>; Postgres with
+    the <code>postgres</code> crate. Both dialects expose the same shape — schema introspection,
+    query execution, paginated table reads, and transactional row mutations — so the frontend
+    doesn't need to know which one it's talking to. That shared interface is also what makes adding
+    another dialect later (SQL Server, for instance) a matter of implementing the same commands
+    rather than reworking the app.</p>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Postgres implementation notes</h2>
+      <p>A few deliberate tradeoffs in how the Postgres dialect talks to the wire protocol.</p>
+    </div>
+    <div class="feature-table">
+      <div class="ft-row head">
+        <div>Area</div>
+        <div>How it works</div>
+        <div>&nbsp;</div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Reads</div>
+        <div class="ft-desc">Arbitrary queries and table-page fetches use Postgres's simple query protocol, which returns every value as text. That sidesteps decoding dozens of Postgres OIDs into JSON, at the cost of numbers and booleans arriving as strings rather than native JSON types.</div>
+        <div class="ft-badges"><span class="badge accent">Postgres</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Writes</div>
+        <div class="ft-desc">Row inserts, updates, and deletes from the table editor use the extended protocol, with every parameter bound as <code>TEXT</code> and cast to the destination column's real type in the SQL itself (<code>$1::int4</code>, <code>$1::timestamp</code>, etc.) — the standard way to send dynamically-typed values through <code>tokio-postgres</code> without knowing column types at compile time.</div>
+        <div class="ft-badges"><span class="badge accent">Postgres</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Tables without a primary key</div>
+        <div class="ft-desc">Postgres has no stable per-row identifier equivalent to SQLite's <code>rowid</code> — <code>ctid</code> changes across updates and vacuums — so QuerySQL falls back to using every column as a composite identity for edits.</div>
+        <div class="ft-badges"><span class="badge accent">Postgres</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Schema scope</div>
+        <div class="ft-desc">Only the <code>public</code> schema is introspected for now.</div>
+        <div class="ft-badges"><span class="badge accent">Postgres</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>SQL injection guards</h2>
+      <p>Identifiers can't be parameterized the way values can, so both dialects validate them before they ever reach a query string.</p>
+    </div>
+    <div class="prose">
+      <p>Table and column names are checked against <code>sqlite_master</code> /
+      <code>PRAGMA table_info</code> on SQLite, or <code>information_schema</code> on Postgres,
+      before being interpolated into generated SQL — for the paginated table view and the row
+      mutation commands, where identifiers have to be built dynamically. Query values themselves go
+      through parameterized queries the normal way.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>The staged edit model</h2>
+      <p>Why the table editor works the way it does.</p>
+    </div>
+    <blockquote class="stage">
+      Every edit is staged first. Fix a typo, add a row, drop a record — nothing reaches the
+      database until you commit. Change your mind? Discard, and it's like it never happened.
+    </blockquote>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What's stored, and where</h2>
+      <p>Everything QuerySQL remembers between launches stays on your machine.</p>
+    </div>
+    <div class="prose">
+      <p>Recent connections and query history are persisted through <code>tauri-plugin-store</code>
+      to JSON files in the app's config directory. Postgres passwords are never included — recent
+      Postgres connections are saved without one, so reconnecting from the list always re-prompts.
+      Theme preference is stored in <code>localStorage</code>.</p>
+      <p>The frontend keeps open connections, query and table tabs, and theme state in
+      <a href="https://zustand.docs.pmnd.rs/">Zustand</a> stores, with a
+      <a href="https://codemirror.net/">CodeMirror</a>-powered editor for schema-aware
+      autocomplete and a virtualized grid for large result sets.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="fine">QuerySQL — built with Tauri, Rust &amp; React.</span>
+    <span class="fine"><a href="/compare.html">Compare</a> · <a href="/faq.html">FAQ</a></span>
+    <a class="fine dl" href="/downloads/QuerySQL_0.1.0_aarch64.dmg" download>Download v0.1.0 for macOS →</a>
+  </div>
+</footer>
+
+</body>
+</html>

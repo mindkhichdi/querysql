@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuerySQL vs TablePlus, DBeaver, Postico &amp; pgAdmin</title>
+<meta name="description" content="How QuerySQL compares to TablePlus, DBeaver, Postico, pgAdmin, and DB Browser for SQLite on price, platform, dialects, and the table-editing model.">
+<link rel="canonical" href="https://querysql.dev/compare.html">
+<link rel="icon" type="image/png" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QuerySQL">
+<meta property="og:title" content="QuerySQL vs TablePlus, DBeaver, Postico &amp; pgAdmin">
+<meta property="og:description" content="How QuerySQL compares to other SQLite and Postgres GUI clients on price, platform, and features.">
+<meta property="og:url" content="https://querysql.dev/compare.html">
+<meta property="og:image" content="https://querysql.dev/icon.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="QuerySQL vs TablePlus, DBeaver, Postico &amp; pgAdmin">
+<meta name="twitter:description" content="How QuerySQL compares to other SQLite and Postgres GUI clients on price, platform, and features.">
+<meta name="twitter:image" content="https://querysql.dev/icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="wordmark" href="/"><span class="dot"></span>QuerySQL</a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/compare.html" aria-current="page">Compare</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">About</a>
+      <a class="sponsor" href="https://buymeacoffee.com/mindkhichdi">☕ Sponsor me</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">how it compares</p>
+    <h1>QuerySQL vs. TablePlus, DBeaver, Postico &amp; pgAdmin</h1>
+    <p class="dek">A plain look at where QuerySQL fits next to the other SQLite and Postgres GUI clients people usually reach for.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="table-scroll">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th scope="col">Tool</th>
+            <th scope="col">SQLite</th>
+            <th scope="col">Postgres</th>
+            <th scope="col">Engine</th>
+            <th scope="col">Platform</th>
+            <th scope="col">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <th scope="row">QuerySQL</th>
+            <td class="yes">Yes</td>
+            <td class="yes">Yes</td>
+            <td>Tauri (Rust + native webview)</td>
+            <td>macOS (Apple Silicon)</td>
+            <td>Free</td>
+          </tr>
+          <tr>
+            <th scope="row">TablePlus</th>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Native (Qt/Cocoa)</td>
+            <td>macOS, Windows, Linux</td>
+            <td class="muted">Free tier, paid license for full use</td>
+          </tr>
+          <tr>
+            <th scope="row">DBeaver Community</th>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Electron-style (Java/Eclipse RCP)</td>
+            <td>macOS, Windows, Linux</td>
+            <td>Free (paid Enterprise tier)</td>
+          </tr>
+          <tr>
+            <th scope="row">Postico 2</th>
+            <td class="muted">No</td>
+            <td>Yes</td>
+            <td>Native (Cocoa)</td>
+            <td>macOS only</td>
+            <td class="muted">Paid, one-time</td>
+          </tr>
+          <tr>
+            <th scope="row">pgAdmin 4</th>
+            <td class="muted">No</td>
+            <td>Yes</td>
+            <td>Web app (Python/Flask, desktop wrapper)</td>
+            <td>macOS, Windows, Linux</td>
+            <td>Free</td>
+          </tr>
+          <tr>
+            <th scope="row">DB Browser for SQLite</th>
+            <td>Yes</td>
+            <td class="muted">No</td>
+            <td>Native (Qt)</td>
+            <td>macOS, Windows, Linux</td>
+            <td>Free</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caveat">Pricing and platform support change — this reflects each tool's general
+      positioning, not a guarantee of current terms. Check the vendor's site before deciding.</p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Where QuerySQL fits</h2>
+      <p>What's actually different about it, beyond the feature checklist.</p>
+    </div>
+    <div class="feature-table">
+      <div class="ft-row head">
+        <div>Trait</div>
+        <div>What it means</div>
+        <div>&nbsp;</div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">One app, two dialects</div>
+        <div class="ft-desc">Most free tools pick a side — SQLite (DB Browser) or Postgres (pgAdmin, Postico). QuerySQL handles both with the same schema tree, editor, and table view.</div>
+        <div class="ft-badges"><span class="badge accent">SQLite + Postgres</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Staged, transactional table edits</div>
+        <div class="ft-desc">Row edits in the table view apply nowhere until you Commit — as a single transaction — or Discard the whole batch. Not every GUI client stages edits this explicitly.</div>
+        <div class="ft-badges"><span class="badge accent">table editor</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Native, not Electron</div>
+        <div class="ft-desc">Built with Tauri: a Rust backend and the OS's own webview, rather than bundling a full Chromium runtime. Smaller install, lower idle memory than Electron-based clients.</div>
+        <div class="ft-badges"><span class="badge">Tauri</span><span class="badge">Rust</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="ft-name">Free and locally-run</div>
+        <div class="ft-desc">No account, no license key, no telemetry endpoint to trust — connections and history are stored on your machine, and the source is on GitHub.</div>
+        <div class="ft-badges"><span class="badge">free</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Where it doesn't fit yet</h2>
+      <p>QuerySQL is early. Some things the tools above have that this doesn't, today:</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li>Prebuilt installers only cover <strong>macOS on Apple Silicon</strong> — no Windows or Linux download yet.</li>
+        <li>No SSH tunneling or bastion-host support for remote Postgres connections.</li>
+        <li>Only the <code>public</code> schema is introspected on Postgres.</li>
+        <li>No ER diagrams, query plan visualizer, or data-generation tooling.</li>
+        <li>The build isn't notarized, so macOS shows a security prompt on first launch — see the <a href="/faq.html">FAQ</a> for how to get past it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="fine">QuerySQL — built with Tauri, Rust &amp; React.</span>
+    <span class="fine"><a href="/faq.html">FAQ</a> · <a href="/about.html">About</a></span>
+    <a class="fine dl" href="/downloads/QuerySQL_0.1.0_aarch64.dmg" download>Download v0.1.0 for macOS →</a>
+  </div>
+</footer>
+
+</body>
+</html>
