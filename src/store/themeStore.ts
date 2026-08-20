@@ -7,7 +7,7 @@ interface ThemeState {
   toggle: () => void;
 }
 
-const STORAGE_KEY = "querydeck-theme";
+const STORAGE_KEY = "querysql-theme";
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY);

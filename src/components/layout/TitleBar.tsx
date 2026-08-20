@@ -17,7 +17,7 @@ export function TitleBar({ onToggleHistory, historyOpen }: TitleBarProps) {
     >
       <div data-tauri-drag-region className="flex items-center gap-1.5 pl-16">
         <Database size={14} className="text-[var(--qd-accent)]" />
-        <span className="text-[12.5px] font-medium">QueryDeck</span>
+        <span className="text-[12.5px] font-medium">QuerySQL</span>
       </div>
       <div className="flex items-center gap-1">
         <button

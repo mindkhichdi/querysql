@@ -1,4 +1,4 @@
-# QueryDeck
+# QuerySQL
 
 A desktop SQL client for browsing and editing SQLite and Postgres databases — built independently with Tauri, Rust, and
 React.

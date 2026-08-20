@@ -69,7 +69,7 @@ export function ConnectionScreen() {
           <div className="w-8 h-8 rounded-lg bg-[var(--qd-accent)] flex items-center justify-center">
             <Database size={17} className="text-white" />
           </div>
-          <h1 className="text-lg font-semibold">QueryDeck</h1>
+          <h1 className="text-lg font-semibold">QuerySQL</h1>
         </div>
         <p className="text-[12.5px] text-[var(--qd-text-muted)] mb-6">
           Rethink how you query, explore, and work with data.
