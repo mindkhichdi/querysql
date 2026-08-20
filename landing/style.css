@@ -211,6 +211,13 @@
     font-size: 12px;
     color: var(--text-muted);
   }
+  .cta-alt {
+    margin: 10px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+  }
+  .cta-alt a { color: var(--accent); text-decoration: none; }
+  .cta-alt a:hover { text-decoration: underline; }
 
   .btn {
     display: inline-flex;
