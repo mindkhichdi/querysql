@@ -205,12 +205,31 @@
   .dek strong { color: var(--text); font-weight: 600; }
 
   .cta-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .cta-note {
-    margin: 14px 0 0;
+  .gk-note {
+    margin: 16px 0 0;
+    max-width: 46ch;
+    padding: 12px 14px;
+    border: 1px solid var(--highlight);
+    border-radius: 8px;
+    background: var(--highlight-soft);
+  }
+  .gk-lede {
+    margin: 0 0 8px;
     font-family: var(--font-mono);
     font-size: 12px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .gk-lede strong { color: var(--highlight); }
+  .gk-steps {
+    margin: 0;
+    padding-left: 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
     color: var(--text-muted);
   }
+  .gk-steps strong { color: var(--text); font-weight: 600; }
   .cta-alt {
     margin: 10px 0 0;
     font-family: var(--font-mono);

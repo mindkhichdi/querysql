@@ -5,14 +5,23 @@
   var isWindows = /Win/.test(navigator.userAgent);
 
   var MAC_NOTE =
-    'v0.1.0 · Apple Silicon · unsigned build — macOS will warn it can’t be verified. ' +
-    'Open <strong>System Settings → Privacy &amp; Security</strong>, scroll to the bottom, ' +
-    'and click <strong>Open Anyway</strong> next to QuerySQL (only needed the first time).';
+    '<p class="gk-lede"><strong>v0.1.0 · Apple Silicon · unsigned build.</strong> macOS will say it ' +
+    '&ldquo;could not verify&rdquo; QuerySQL &mdash; that&rsquo;s Gatekeeper flagging any app without ' +
+    'a $99/yr Apple Developer signature, not a sign anything&rsquo;s actually wrong. One-time fix:</p>' +
+    '<ol class="gk-steps">' +
+    '<li>Open <strong>System Settings &rarr; Privacy &amp; Security</strong></li>' +
+    '<li>Scroll to the bottom and click <strong>Open Anyway</strong> next to QuerySQL</li>' +
+    '<li>Confirm with <strong>Open Anyway</strong> once more in the dialog that pops up</li>' +
+    '</ol>';
 
   var WIN_NOTE =
-    'v0.1.0 · x64 · unsigned build — Windows SmartScreen will warn it’s from an ' +
-    'unknown publisher. Click <strong>More info</strong>, then <strong>Run anyway</strong> ' +
-    '(only needed the first time).';
+    '<p class="gk-lede"><strong>v0.1.0 · x64 · unsigned build.</strong> Windows SmartScreen will say ' +
+    'it protected your PC &mdash; that&rsquo;s the same unsigned-build flag, not a sign anything&rsquo;s ' +
+    'actually wrong. One-time fix:</p>' +
+    '<ol class="gk-steps">' +
+    '<li>Click <strong>More info</strong> on the SmartScreen dialog</li>' +
+    '<li>Click <strong>Run anyway</strong></li>' +
+    '</ol>';
 
   function apply() {
     document.querySelectorAll('[data-dl="primary"]').forEach(function (el) {
