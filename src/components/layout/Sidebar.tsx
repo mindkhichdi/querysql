@@ -1,4 +1,4 @@
-import { ChevronDown, Database, FilePlus2, FolderOpen, Plus, Server, X } from "lucide-react";
+import { ChevronDown, Database, FilePlus2, FolderOpen, Plus, Server, Waypoints, X } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 import { SchemaTree } from "../schema/SchemaTree";
@@ -11,6 +11,7 @@ export function Sidebar() {
   const { connections, activeId, schemas, setActive, openDatabase, closeConnection } = useConnectionStore();
   const openQueryTab = useTabStore((s) => s.openQueryTab);
   const openTableTab = useTabStore((s) => s.openTableTab);
+  const openDiagramTab = useTabStore((s) => s.openDiagramTab);
   const closeTabsForConnection = useTabStore((s) => s.closeTabsForConnection);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [showPgForm, setShowPgForm] = useState(false);
@@ -134,8 +135,16 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto mt-2">
-        <div className="px-3 pb-1 text-[10.5px] uppercase tracking-wide text-[var(--qd-text-muted)]">
-          Tables
+        <div className="px-3 pb-1 flex items-center justify-between text-[10.5px] uppercase tracking-wide text-[var(--qd-text-muted)]">
+          <span>Tables</span>
+          <button
+            onClick={() => activeId && openDiagramTab(activeId)}
+            disabled={!activeId}
+            title="View schema diagram"
+            className="normal-case tracking-normal shrink-0 rounded-sm p-0.5 hover:bg-[var(--qd-bg-inset)] hover:text-[var(--qd-text)] disabled:opacity-30 cursor-pointer"
+          >
+            <Waypoints size={12} />
+          </button>
         </div>
         {schema ? (
           <SchemaTree

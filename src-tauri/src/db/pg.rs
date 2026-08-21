@@ -12,7 +12,7 @@ use super::mutation::{check_columns, RowChange};
 use super::pagination::TablePage;
 use super::query::QueryResult;
 use super::quote_ident;
-use super::schema::{ColumnInfo, IndexInfo, SchemaInfo, TableInfo};
+use super::schema::{mark_unique_columns, ColumnInfo, ForeignKeyInfo, IndexInfo, SchemaInfo, TableInfo};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -163,7 +163,7 @@ pub fn get_schema(client: &mut Client) -> Result<SchemaInfo, String> {
                 &[&name],
             )
             .map_err(|e| e.to_string())?;
-        let columns: Vec<ColumnInfo> = column_rows
+        let mut columns: Vec<ColumnInfo> = column_rows
             .iter()
             .map(|row| {
                 let col_name: String = row.get(0);
@@ -172,6 +172,7 @@ pub fn get_schema(client: &mut Client) -> Result<SchemaInfo, String> {
                     name: col_name,
                     type_name: row.get(1),
                     not_null: row.get::<_, String>(2) == "NO",
+                    unique: false,
                     default_value: row.get(3),
                 }
             })
@@ -199,16 +200,77 @@ pub fn get_schema(client: &mut Client) -> Result<SchemaInfo, String> {
                 })
                 .collect()
         };
+        mark_unique_columns(&mut columns, &indexes);
+
+        let foreign_keys = if is_view {
+            vec![]
+        } else {
+            pg_foreign_keys(client, &name)?
+        };
 
         tables.push(TableInfo {
             name,
             is_view,
             columns,
             indexes,
+            foreign_keys,
         });
     }
 
     Ok(SchemaInfo { tables })
+}
+
+/// One row per (constraint, column-position) pair, positionally joining each
+/// FK column to the referenced unique/PK column at the same ordinal position
+/// within the constraint — the standard information_schema pattern for
+/// resolving FK column correspondence, including for composite keys.
+fn pg_foreign_keys(client: &mut Client, table: &str) -> Result<Vec<ForeignKeyInfo>, String> {
+    let rows = client
+        .query(
+            "SELECT rc.constraint_name, kcu1.column_name, kcu2.table_name, kcu2.column_name, \
+                    rc.delete_rule, rc.update_rule \
+             FROM information_schema.referential_constraints rc \
+             JOIN information_schema.key_column_usage kcu1 \
+               ON kcu1.constraint_name = rc.constraint_name \
+              AND kcu1.constraint_schema = rc.constraint_schema \
+             JOIN information_schema.key_column_usage kcu2 \
+               ON kcu2.constraint_name = rc.unique_constraint_name \
+              AND kcu2.constraint_schema = rc.unique_constraint_schema \
+              AND kcu2.ordinal_position = kcu1.ordinal_position \
+             WHERE kcu1.table_schema = 'public' AND kcu1.table_name = $1 \
+             ORDER BY rc.constraint_name, kcu1.ordinal_position",
+            &[&table],
+        )
+        .map_err(|e| e.to_string())?;
+
+    let mut fks: Vec<ForeignKeyInfo> = Vec::new();
+    for row in rows.iter() {
+        let constraint_name: String = row.get(0);
+        let column_name: String = row.get(1);
+        let ref_table: String = row.get(2);
+        let ref_column: String = row.get(3);
+        let on_delete: String = row.get(4);
+        let on_update: String = row.get(5);
+
+        match fks
+            .iter_mut()
+            .find(|fk: &&mut ForeignKeyInfo| fk.name.as_deref() == Some(constraint_name.as_str()))
+        {
+            Some(fk) => {
+                fk.columns.push(column_name);
+                fk.ref_columns.push(ref_column);
+            }
+            None => fks.push(ForeignKeyInfo {
+                name: Some(constraint_name),
+                columns: vec![column_name],
+                ref_table,
+                ref_columns: vec![ref_column],
+                on_delete,
+                on_update,
+            }),
+        }
+    }
+    Ok(fks)
 }
 
 fn collect_simple_query_rows(

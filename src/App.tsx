@@ -5,6 +5,7 @@ import { TabBar } from "./components/layout/TabBar";
 import { TitleBar } from "./components/layout/TitleBar";
 import { QueryHistoryPanel } from "./components/history/QueryHistoryPanel";
 import { QueryPanel } from "./components/query/QueryPanel";
+import { SchemaDiagram } from "./components/schema/SchemaDiagram";
 import { TableDataGrid } from "./components/table-editor/TableDataGrid";
 import { useConnectionStore } from "./store/connectionStore";
 import { useTabStore } from "./store/tabStore";
@@ -32,6 +33,8 @@ export default function App() {
             {activeTab ? (
               activeTab.kind === "query" ? (
                 <QueryPanel key={activeTab.id} tab={activeTab} />
+              ) : activeTab.kind === "diagram" ? (
+                <SchemaDiagram key={activeTab.id} connectionId={activeTab.connectionId} />
               ) : (
                 <TableDataGrid key={activeTab.id} connectionId={activeTab.connectionId} table={activeTab.table} />
               )

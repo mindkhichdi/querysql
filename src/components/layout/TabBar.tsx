@@ -1,4 +1,4 @@
-import { Plus, Table2, Terminal, X } from "lucide-react";
+import { Plus, Table2, Terminal, Waypoints, X } from "lucide-react";
 import { useTabStore } from "../../store/tabStore";
 import { useConnectionStore } from "../../store/connectionStore";
 
@@ -22,6 +22,8 @@ export function TabBar() {
           >
             {tab.kind === "query" ? (
               <Terminal size={12} className="shrink-0" />
+            ) : tab.kind === "diagram" ? (
+              <Waypoints size={12} className="shrink-0 text-[var(--qd-accent)]" />
             ) : (
               <Table2 size={12} className="shrink-0 text-[var(--qd-accent)]" />
             )}

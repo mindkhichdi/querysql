@@ -5,6 +5,7 @@ export interface ColumnInfo {
   type: string;
   not_null: boolean;
   primary_key: boolean;
+  unique: boolean;
   default_value: string | null;
 }
 
@@ -14,11 +15,21 @@ export interface IndexInfo {
   unique: boolean;
 }
 
+export interface ForeignKeyInfo {
+  name: string | null;
+  columns: string[];
+  ref_table: string;
+  ref_columns: string[];
+  on_delete: string;
+  on_update: string;
+}
+
 export interface TableInfo {
   name: string;
   is_view: boolean;
   columns: ColumnInfo[];
   indexes: IndexInfo[];
+  foreign_keys: ForeignKeyInfo[];
 }
 
 export interface SchemaInfo {

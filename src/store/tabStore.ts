@@ -22,7 +22,14 @@ export interface TableTab {
   table: string;
 }
 
-export type Tab = QueryTab | TableTab;
+export interface DiagramTab {
+  id: string;
+  kind: "diagram";
+  connectionId: string;
+  title: string;
+}
+
+export type Tab = QueryTab | TableTab | DiagramTab;
 
 export interface HistoryEntry {
   id: string;
@@ -46,6 +53,7 @@ interface TabState {
   initHistory: () => Promise<void>;
   openQueryTab: (connectionId: string, initialSql?: string) => string;
   openTableTab: (connectionId: string, table: string) => string;
+  openDiagramTab: (connectionId: string) => string;
   closeTab: (id: string) => void;
   closeTabsForConnection: (connectionId: string) => void;
   setActiveTab: (id: string) => void;
@@ -93,6 +101,18 @@ export const useTabStore = create<TabState>((set, get) => ({
     }
     const id = `table-${connectionId}-${table}`;
     const tab: TableTab = { id, kind: "table", connectionId, title: table, table };
+    set((s) => ({ tabs: [...s.tabs, tab], activeTabId: id }));
+    return id;
+  },
+
+  openDiagramTab: (connectionId) => {
+    const existing = get().tabs.find((t) => t.kind === "diagram" && t.connectionId === connectionId);
+    if (existing) {
+      set({ activeTabId: existing.id });
+      return existing.id;
+    }
+    const id = `diagram-${connectionId}`;
+    const tab: DiagramTab = { id, kind: "diagram", connectionId, title: "Schema" };
     set((s) => ({ tabs: [...s.tabs, tab], activeTabId: id }));
     return id;
   },
