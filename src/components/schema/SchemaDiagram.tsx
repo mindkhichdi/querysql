@@ -1,5 +1,5 @@
 import { Maximize2, Table2, View, ZoomIn, ZoomOut } from "lucide-react";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useConnectionStore } from "../../store/connectionStore";
 import type { ColumnInfo, TableInfo } from "../../types";
 
@@ -84,6 +84,8 @@ function computeLayout(tables: TableInfo[]): { nodes: LayoutNode[]; width: numbe
 
 interface Edge {
   key: string;
+  source: string;
+  target: string;
   x1: number;
   y1: number;
   x2: number;
@@ -113,9 +115,21 @@ interface TableCardProps {
   table: TableInfo;
   schemaPrefix: string;
   registerColumnRef: (table: string, column: string, el: HTMLDivElement | null) => void;
+  selected: boolean;
+  connected: boolean;
+  dimmed: boolean;
+  onSelect: (table: string) => void;
 }
 
-function TableCard({ table, schemaPrefix, registerColumnRef }: TableCardProps) {
+function TableCard({
+  table,
+  schemaPrefix,
+  registerColumnRef,
+  selected,
+  connected,
+  dimmed,
+  onSelect,
+}: TableCardProps) {
   const fkColumns = useMemo(
     () => new Set(table.foreign_keys.flatMap((fk) => fk.columns)),
     [table.foreign_keys],
@@ -123,8 +137,23 @@ function TableCard({ table, schemaPrefix, registerColumnRef }: TableCardProps) {
 
   return (
     <div
-      className="absolute rounded-md border border-[var(--qd-border)] bg-[var(--qd-bg-elevated)] shadow-sm overflow-hidden"
-      style={{ width: CARD_WIDTH }}
+      className="absolute rounded-md border bg-[var(--qd-bg-elevated)] overflow-hidden cursor-pointer"
+      style={{
+        width: CARD_WIDTH,
+        borderColor: selected || connected ? "var(--qd-accent)" : "var(--qd-border)",
+        boxShadow: selected
+          ? "0 0 0 2px var(--qd-accent), 0 0 20px 3px var(--qd-accent)"
+          : connected
+            ? "0 0 0 1.5px var(--qd-accent)"
+            : "0 1px 2px rgba(0,0,0,0.06)",
+        opacity: dimmed ? 0.35 : 1,
+        transition: "opacity 150ms ease, box-shadow 150ms ease, border-color 150ms ease",
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(table.name);
+      }}
     >
       <div className="flex items-center justify-between gap-2 px-2.5 py-2 border-b border-[var(--qd-border)] bg-[var(--qd-bg-inset)]">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -176,7 +205,7 @@ function TableCard({ table, schemaPrefix, registerColumnRef }: TableCardProps) {
   );
 }
 
-function EdgeLine({ edge }: { edge: Edge }) {
+function EdgeLine({ edge, highlighted, dimmed }: { edge: Edge; highlighted: boolean; dimmed: boolean }) {
   const dx = Math.max(Math.abs(edge.x2 - edge.x1) * 0.5, 30);
   const path = `M ${edge.x1} ${edge.y1} C ${edge.x1 + (edge.x2 > edge.x1 ? dx : -dx)} ${edge.y1}, ${
     edge.x2 + (edge.x2 > edge.x1 ? -dx : dx)
@@ -186,29 +215,41 @@ function EdgeLine({ edge }: { edge: Edge }) {
   const midY = (edge.y1 + edge.y2) / 2;
   const label = `ON DELETE ${edge.onDelete}`;
   const labelWidth = label.length * 5.4 + 8;
+  const strokeWidth = highlighted ? (edge.destructive ? 3 : 2.25) : edge.destructive ? 2 : 1.25;
+  const opacity = dimmed ? 0.08 : highlighted ? 1 : 0.8;
 
   return (
-    <g>
-      <path d={path} fill="none" stroke={color} strokeWidth={edge.destructive ? 2 : 1.25} opacity={0.8} />
-      <rect
-        x={midX - labelWidth / 2}
-        y={midY - 8}
-        width={labelWidth}
-        height={14}
-        fill="var(--qd-bg)"
-        opacity={0.92}
+    <g style={{ transition: "opacity 150ms ease" }} opacity={opacity}>
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        filter={highlighted ? "url(#edge-glow)" : undefined}
       />
-      <text
-        x={midX}
-        y={midY + 3}
-        textAnchor="middle"
-        className="qd-mono"
-        fontSize={9}
-        fill={color}
-        style={{ userSelect: "none" }}
-      >
-        {label}
-      </text>
+      {!dimmed && (
+        <>
+          <rect
+            x={midX - labelWidth / 2}
+            y={midY - 8}
+            width={labelWidth}
+            height={14}
+            fill="var(--qd-bg)"
+            opacity={0.92}
+          />
+          <text
+            x={midX}
+            y={midY + 3}
+            textAnchor="middle"
+            className="qd-mono"
+            fontSize={9}
+            fill={color}
+            style={{ userSelect: "none" }}
+          >
+            {label}
+          </text>
+        </>
+      )}
     </g>
   );
 }
@@ -224,10 +265,31 @@ export function SchemaDiagram({ connectionId }: { connectionId: string }) {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const dragState = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
 
   const tables = schema?.tables ?? [];
   const layout = useMemo(() => computeLayout(tables), [tables]);
+
+  const connectedTables = useMemo(() => {
+    if (!selectedTable) return new Set<string>();
+    const set = new Set<string>();
+    for (const e of edges) {
+      if (e.source === selectedTable) set.add(e.target);
+      if (e.target === selectedTable) set.add(e.source);
+    }
+    return set;
+  }, [edges, selectedTable]);
+
+  function toggleSelect(table: string) {
+    setSelectedTable((cur) => (cur === table ? null : table));
+  }
+
+  useEffect(() => {
+    if (selectedTable && !tables.some((t) => t.name === selectedTable)) {
+      setSelectedTable(null);
+    }
+  }, [tables, selectedTable]);
 
   function registerColumnRef(table: string, column: string, el: HTMLDivElement | null) {
     const key = `${table}.${column}`;
@@ -262,6 +324,8 @@ export function SchemaDiagram({ connectionId }: { connectionId: string }) {
           const x2 = goingRight ? tCenterX : tCenterX + CARD_WIDTH;
           next.push({
             key: `${t.name}.${fk.columns.join(",")}->${fk.ref_table}`,
+            source: t.name,
+            target: fk.ref_table,
             x1,
             y1: sCenterY,
             x2,
@@ -339,6 +403,7 @@ export function SchemaDiagram({ connectionId }: { connectionId: string }) {
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onClick={() => setSelectedTable(null)}
       onMouseUp={stopDrag}
       onMouseLeave={stopDrag}
     >
@@ -357,15 +422,40 @@ export function SchemaDiagram({ connectionId }: { connectionId: string }) {
           width={layout.width}
           height={layout.height}
         >
-          {edges.map((edge) => (
-            <EdgeLine key={edge.key} edge={edge} />
-          ))}
+          <defs>
+            <filter id="edge-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {edges.map((edge) => {
+            const highlighted =
+              selectedTable !== null && (edge.source === selectedTable || edge.target === selectedTable);
+            const dimmed = selectedTable !== null && !highlighted;
+            return <EdgeLine key={edge.key} edge={edge} highlighted={highlighted} dimmed={dimmed} />;
+          })}
         </svg>
-        {layout.nodes.map((node) => (
-          <div key={node.table.name} style={{ position: "absolute", left: node.x, top: node.y }}>
-            <TableCard table={node.table} schemaPrefix={schemaPrefix} registerColumnRef={registerColumnRef} />
-          </div>
-        ))}
+        {layout.nodes.map((node) => {
+          const selected = node.table.name === selectedTable;
+          const connected = connectedTables.has(node.table.name);
+          const dimmed = selectedTable !== null && !selected && !connected;
+          return (
+            <div key={node.table.name} style={{ position: "absolute", left: node.x, top: node.y }}>
+              <TableCard
+                table={node.table}
+                schemaPrefix={schemaPrefix}
+                registerColumnRef={registerColumnRef}
+                selected={selected}
+                connected={connected}
+                dimmed={dimmed}
+                onSelect={toggleSelect}
+              />
+            </div>
+          );
+        })}
       </div>
 
       <div className="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-[var(--qd-border)] bg-[var(--qd-bg-elevated)] shadow-sm p-1">
